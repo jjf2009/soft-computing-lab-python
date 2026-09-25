@@ -23,7 +23,6 @@ def sigmoid(net):
 
 
 def sigmoid_derivative(output):
-    # f'(net) = f(net) * (1 - f(net)), written in terms of the output
     return output * (1 - output)
 
 
