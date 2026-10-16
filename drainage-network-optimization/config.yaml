@@ -1,0 +1,59 @@
+# Central config for the drainage-network-optimization pipeline.
+# Every script reads this so the three algorithms share one setup (fair comparison).
+
+paths:
+  data_dir: data                 # raw Bellinge files land here (gitignored)
+  tables_dir: outputs/tables     # preprocessed parquet tables
+  runs_dir: outputs/runs         # per-algorithm/per-seed results
+  figures_dir: outputs/figures
+  cache_dir: outputs/sim_cache   # chromosome -> f3 cache (write-through)
+
+dataset:
+  # DTU public repo (CC BY 4.0). download_data.py resolves files via the Figshare API,
+  # so these are fallbacks / identifiers, not hard-coded download URLs.
+  collection_doi: "10.11583/DTU.c.5029124"
+  figshare_article_ids: []       # filled by download_data.py after resolving the collection
+  files:                         # expected filenames inside the dataset
+    - "2_Sensordata_v2.pdf"
+    - "2_Coordinates_of_sensors.csv"
+    - "2_cleaned_data.zip"
+    - "2_raw_data.zip"
+  inp_glob: "*.inp"              # the EPA SWMM model (in the SWMM subfolder)
+
+scope: sub                       # 'sub' (fast demo) or 'full' (overnight batch)
+
+subcatchment:
+  # How to carve the few-hundred-conduit slice for the live demo.
+  method: outfall                # 'outfall' (upstream of one outfall) or 'bbox'
+  outfall_id: null               # set after inspecting the model; null = pick the largest
+  max_conduits: 300              # cap the slice size
+
+graph:
+  extend_candidates: false       # start with as-built conduits only; true adds NN/Delaunay edges
+  max_candidate_length: 200.0    # metres; drop generated edges longer than this
+  nearest_neighbours: 4          # k for NN edge generation (if extend_candidates)
+
+storm:
+  # Design storm extracted once by preprocess.py from the peak event.
+  window_hours: 6
+  routing_step_seconds: 10
+
+objectives:
+  parallel_pipe_penalty: 5.0     # extra f1 cost per redundant parallel pipe
+  uphill_penalty: 1000.0         # f3 penalty per uphill (non-gravity) active conduit
+
+optimization:
+  pop_size: 60
+  n_gen: 40                      # evaluation budget = pop_size * n_gen (shared by all algos)
+  seeds_demo: [0, 1, 2, 3, 4]    # small set for the demo
+  seeds_full: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+               15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+  n_workers: 14                  # leave 2 of 16 cores for the OS
+  crossover: two_point           # 'two_point' or 'uniform'
+  crossover_prob: 0.9
+  mutation_prob: null            # null => pymoo default 1/n_var (one bit flip on average)
+  ga_weight_sets:                # weighted-sum GA sweeps these to trace a front
+    - [0.34, 0.33, 0.33]
+    - [0.60, 0.20, 0.20]
+    - [0.20, 0.60, 0.20]
+    - [0.20, 0.20, 0.60]

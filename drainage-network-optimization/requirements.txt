@@ -1,0 +1,19 @@
+# SC Mini Project — Drainage Network Optimization
+# Install in a Python 3.11/3.12 venv (NOT the system 3.14 — no SWMM/pymoo wheels there).
+#
+#   python3.12 -m venv .venv
+#   . .venv/bin/activate
+#   pip install -r requirements.txt
+
+pymoo>=0.6.1        # GA + NSGA-II + MOEA/D + Hypervolume/IGD, one library
+pyswmm>=2.0         # drives EPA SWMM for the f3 flooding objective
+swmmio>=0.7         # read/write .inp network sections
+pandas>=2.0
+numpy>=1.26
+scipy>=1.11         # Wilcoxon rank-sum, spatial (Delaunay/KDTree)
+pdfplumber>=0.11    # parse the sensor data-dictionary PDF -> constraints table
+pyarrow>=14         # parquet tables
+matplotlib>=3.8     # plots
+tqdm>=4.66          # progress bars for long runs
+pyyaml>=6.0         # config.yaml
+requests>=2.31      # dataset download from the DTU/Figshare API

@@ -1,0 +1,15 @@
+# Raw dataset (large, CC BY 4.0 — download with src/download_data.py, don't commit)
+data/
+
+# Generated outputs
+outputs/
+!outputs/.gitkeep
+
+# Python env
+.venv/
+__pycache__/
+*.pyc
+
+# SWMM run artefacts
+*.rpt
+*.out

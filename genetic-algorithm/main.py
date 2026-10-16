@@ -1,72 +1,101 @@
-# SC Lab - Experiment 7: Genetic Algorithm for an optimization problem.
-# Maximise f(x) = x^2 for x in [0, 31] using 5-bit binary chromosomes
-# (the classic Goldberg example): roulette selection, single-point crossover,
-# and bit-flip mutation.
+"""SC Experiment 5: Genetic Algorithm for function maximisation.
 
+Maximise f(x) = x * sin(10 * pi * x) + 2, for 0 <= x <= 1.
+Binary chromosomes with 10 bits are used to represent x.
+"""
+
+import math
 import random
 
-BITS = 5
-POP_SIZE = 6
-GENERATIONS = 20
+
+BITS = 10
+POPULATION_SIZE = 20
+GENERATIONS = 50
 CROSSOVER_RATE = 0.8
-MUTATION_RATE = 0.05
+MUTATION_RATE = 1 / BITS
+ELITISM = True
+
+
+def decode(chromosome):
+    """Convert a binary chromosome to a real value in [0, 1]."""
+    value = int("".join(map(str, chromosome)), 2)
+    return value / (2**BITS - 1)
 
 
 def fitness(chromosome):
-    x = int("".join(map(str, chromosome)), 2)
-    return x * x
+    """Return the objective function value for a chromosome."""
+    x = decode(chromosome)
+    return x * math.sin(10 * math.pi * x) + 2
 
 
 def random_chromosome():
     return [random.randint(0, 1) for _ in range(BITS)]
 
 
-def roulette_select(population, fits):
-    total = sum(fits)
-    pick = random.uniform(0, total)
-    running = 0
-    for chromo, fit in zip(population, fits):
-        running += fit
-        if running >= pick:
-            return chromo[:]
+def roulette_select(population, fitnesses):
+    """Select one chromosome with probability proportional to its fitness."""
+    total_fitness = sum(fitnesses)
+    pick = random.uniform(0, total_fitness)
+    cumulative = 0.0
+    for chromosome, value in zip(population, fitnesses):
+        cumulative += value
+        if cumulative >= pick:
+            return chromosome[:]
     return population[-1][:]
 
 
-def crossover(a, b):
-    if random.random() < CROSSOVER_RATE:
-        point = random.randint(1, BITS - 1)
-        return a[:point] + b[point:], b[:point] + a[point:]
-    return a[:], b[:]
+def crossover(parent1, parent2):
+    """Perform single-point crossover with the configured probability."""
+    if random.random() >= CROSSOVER_RATE:
+        return parent1[:], parent2[:]
+    point = random.randint(1, BITS - 1)
+    return (parent1[:point] + parent2[point:],
+            parent2[:point] + parent1[point:])
 
 
 def mutate(chromosome):
-    return [1 - bit if random.random() < MUTATION_RATE else bit for bit in chromosome]
+    """Apply bit-flip mutation independently to every bit."""
+    return [1 - bit if random.random() < MUTATION_RATE else bit
+            for bit in chromosome]
 
 
 def genetic_algorithm():
-    population = [random_chromosome() for _ in range(POP_SIZE)]
+    population = [random_chromosome() for _ in range(POPULATION_SIZE)]
     best = None
-    for gen in range(1, GENERATIONS + 1):
-        fits = [fitness(c) for c in population]
-        gen_best = max(population, key=fitness)
-        if best is None or fitness(gen_best) > fitness(best):
-            best = gen_best[:]
-        x = int("".join(map(str, gen_best)), 2)
-        print(f"Gen {gen:2d}: best x={x:2d}, f(x)={fitness(gen_best):4d}, avg={sum(fits) / len(fits):.1f}")
+
+    for generation in range(1, GENERATIONS + 1):
+        fitnesses = [fitness(chromosome) for chromosome in population]
+        generation_best = max(population, key=fitness)
+        if best is None or fitness(generation_best) > fitness(best):
+            best = generation_best[:]
+
+        print(
+            f"Generation {generation:2d}: "
+            f"best x = {decode(generation_best):.6f}, "
+            f"f(x) = {fitness(generation_best):.6f}, "
+            f"average = {sum(fitnesses) / POPULATION_SIZE:.6f}"
+        )
 
         new_population = []
-        while len(new_population) < POP_SIZE:
-            p1 = roulette_select(population, fits)
-            p2 = roulette_select(population, fits)
-            c1, c2 = crossover(p1, p2)
-            new_population.append(mutate(c1))
-            if len(new_population) < POP_SIZE:
-                new_population.append(mutate(c2))
+        if ELITISM:
+            new_population.append(generation_best[:])
+
+        while len(new_population) < POPULATION_SIZE:
+            parent1 = roulette_select(population, fitnesses)
+            parent2 = roulette_select(population, fitnesses)
+            child1, child2 = crossover(parent1, parent2)
+            new_population.append(mutate(child1))
+            if len(new_population) < POPULATION_SIZE:
+                new_population.append(mutate(child2))
+
         population = new_population
+
     return best
 
 
 if __name__ == "__main__":
     best = genetic_algorithm()
-    x = int("".join(map(str, best)), 2)
-    print(f"\nBest solution: x={x}, f(x)={fitness(best)} (optimum is x=31, f=961)")
+    print(
+        f"\nBest solution: x = {decode(best):.6f}, "
+        f"f(x) = {fitness(best):.6f}"
+    )
