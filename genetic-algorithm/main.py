@@ -12,7 +12,7 @@ ELITISM = True
 def decode(chromosome):
     value = int("".join(map(str, chromosome)), 2)
     return value / (2**BITS - 1)
-
+                                                                                                                                                                                                                                                                                                                                                                                      
 
 def fitness(chromosome):
     x = decode(chromosome)
