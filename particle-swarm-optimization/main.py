@@ -1,8 +1,4 @@
 # SC Lab - Experiment 8: Particle Swarm Optimization.
-# Minimise the sphere function f(x) = sum(x_i^2) in n dimensions. Each particle
-# tracks its own best position (pbest) and follows the swarm best (gbest).
-
-#Any problem and try to optmise it 
 
 import random
 
