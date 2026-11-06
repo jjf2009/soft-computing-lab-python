@@ -5,7 +5,7 @@ import random
 import math
 
 n_particles = 20
-n_iterations = 20
+n_iterations = 2
 w = 0.7
 c1 = 1.5
 c2 = 1.5

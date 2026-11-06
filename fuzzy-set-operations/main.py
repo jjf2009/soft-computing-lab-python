@@ -1,14 +1,10 @@
-# SC Lab - Experiment 5: Operations on fuzzy sets.
-# A fuzzy set is a dict {element: membership in [0, 1]}.
 
 
 def union(a, b):
-    # max of memberships
     return {x: max(a.get(x, 0), b.get(x, 0)) for x in a.keys() | b.keys()}
 
 
 def intersection(a, b):
-    # min of memberships
     return {x: min(a.get(x, 0), b.get(x, 0)) for x in a.keys() | b.keys()}
 
 
@@ -17,7 +13,6 @@ def complement(a):
 
 
 def difference(a, b):
-    # A - B = A ∩ complement(B) = min(mu_A, 1 - mu_B)
     return {x: round(min(a.get(x, 0), 1 - b.get(x, 0)), 3) for x in a.keys() | b.keys()}
 
 
