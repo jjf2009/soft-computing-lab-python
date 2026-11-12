@@ -1,5 +1,3 @@
-
-
 def union(a, b):
     return {x: max(a.get(x, 0), b.get(x, 0)) for x in a.keys() | b.keys()}
 
@@ -14,6 +12,21 @@ def complement(a):
 
 def difference(a, b):
     return {x: round(min(a.get(x, 0), 1 - b.get(x, 0)), 3) for x in a.keys() | b.keys()}
+
+
+def algebraic_sum(a, b):
+    return {x: round(a.get(x, 0) + b.get(x, 0) - a.get(x, 0) * b.get(x, 0), 3)
+            for x in a.keys() | b.keys()}
+
+
+def algebraic_product(a, b):
+    return {x: round(a.get(x, 0) * b.get(x, 0), 3)
+            for x in a.keys() | b.keys()}
+
+
+def bounded_sum(a, b):
+    return {x: round(min(1, a.get(x, 0) + b.get(x, 0)), 3)
+            for x in a.keys() | b.keys()}
 
 
 def show(name, s):
@@ -33,3 +46,7 @@ if __name__ == "__main__":
     show("complement A", complement(A))
     show("complement B", complement(B))
     show("A - B", difference(A, B))
+    print()
+    show("A algebraic sum B", algebraic_sum(A, B))
+    show("A algebraic product B", algebraic_product(A, B))
+    show("A bounded sum B", bounded_sum(A, B))
